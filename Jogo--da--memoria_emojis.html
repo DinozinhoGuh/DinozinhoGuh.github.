@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+ body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+}
+
+#memory-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* Reduz a largura mínima do cartão para se ajustar melhor em telas menores */
+    grid-gap: 5px; /* Reduz a lacuna entre os cartões para se ajustar melhor em telas menores */
+    max-width: 80vw; /* Adapta o tamanho máximo do tabuleiro para 80% da largura da tela */
+    margin-top: 20px;
+}
+
+.card {
+    width: 100%;
+    height: 80px; /* Reduz a altura dos cartões para melhorar a aparência em telas menores */
+    max-width: 80px;
+    background-color: #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px; /* Reduz o tamanho da fonte para melhorar a aparência em telas menores */
+    cursor: pointer;
+    user-select: none;
+}
+
+#reset-button {
+    margin-top: 20px;
+    margin-left: 20px; /* Ajusta a margem esquerda para melhorar o espaçamento em telas menores */
+    font-size: 16px; /* Reduz o tamanho da fonte do botão para melhorar a aparência em telas menores */
+    cursor: pointer;
+}
+
+@media only screen and (max-width: 600px) {
+    /* Adaptações específicas para telas menores, se necessário */
+    #memory-board {
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+        max-width: 90vw;
+    }
+
+    .card {
+        height: 60px;
+        max-width: 60px;
+        font-size: 16px;
+    }
+}
+
+
+    </style>
+    <title>Jogo da Memoria: Emojis</title>
+    <link rel="shortcut icon" href="icone.png" type="image/x-icon">
+
+
+</head>
+<body>
+
+<audio id="background-music" loop>
+    <source src="musicadefundo.mp3" type="audio/mp3">
+</audio>
+
+<div id="memory-board"></div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let emojis = ["😀", "😍", "🐱", "🌈", "🍕", "🚀", "🎉", "🌟", "🎸", "🍦", "🚲", "📚", "🎨", "🍩", "🏖️", "🦄"];
+        let cards = [...emojis, ...emojis]; // Duplicate to create pairs
+        let flippedCards = [];
+        let matchedPairs = 0;
+
+        // Shuffle the cards
+        shuffleCards();
+
+        // Play background music
+        const backgroundMusic = document.getElementById("background-music");
+        backgroundMusic.play();
+
+        const memoryBoard = document.getElementById("memory-board");
+
+        // Create cards on the board
+        cards.forEach((emoji, index) => {
+            const card = document.createElement("div");
+            card.classList.add("card");
+            card.dataset.index = index;
+            card.textContent = "?"; // Hidden by default
+            card.addEventListener("click", flipCard);
+            memoryBoard.appendChild(card);
+        });
+
+        function flipCard() {
+            if (flippedCards.length < 2) {
+                const selectedCard = this;
+                const index = selectedCard.dataset.index;
+
+                // Check if the card is already flipped
+                if (!flippedCards.includes(index)) {
+                    flippedCards.push(index);
+                    selectedCard.textContent = cards[index];
+
+                    if (flippedCards.length === 2) {
+                        setTimeout(checkMatch, 500);
+                    }
+                }
+            }
+        }
+
+        function checkMatch() {
+            const [index1, index2] = flippedCards;
+            const card1 = document.querySelector(`[data-index="${index1}"]`);
+            const card2 = document.querySelector(`[data-index="${index2}"]`);
+
+            if (cards[index1] === cards[index2]) {
+                // Match found
+                matchedPairs++;
+
+                if (matchedPairs === emojis.length) {
+                    alert("Parabéns! Você venceu!");
+                    resetGame();
+                }
+            } else {
+                // No match, flip cards back
+                card1.textContent = "?";
+                card2.textContent = "?";
+            }
+
+            // Clear flipped cards
+            flippedCards = [];
+        }
+
+        function resetGame() {
+            // Shuffle the cards again
+            shuffleCards();
+
+            // Reset variables
+            flippedCards = [];
+            matchedPairs = 0;
+
+            // Reset card display
+            document.querySelectorAll(".card").forEach(card => {
+                card.textContent = "?";
+            });
+        }
+
+        function shuffleCards() {
+            cards.sort(() => Math.random() - 0.5);
+        }
+    });
+</script>
+
+</body>
+</html>
